@@ -52,6 +52,7 @@ module.exports = async (req, res) => {
       bodyParser.raw({ type: 'application/json' })(req, res, async () => {
         try {
           const sig = req.headers['stripe-signature'];
+          const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
           const event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
 
           if (event.type === 'payment_intent.succeeded') {
