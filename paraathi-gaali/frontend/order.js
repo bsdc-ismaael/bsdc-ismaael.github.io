@@ -1,5 +1,5 @@
 // Initialize Stripe.js with your Publishable Key
-const stripe = Stripe('pk_test_51QOgcwAWI44r05bC9xKGFmvEI6bhq1CVjxcTEQ1swqa0fMbW953QXSRyuhXMzSBU5Xw0Xt98GqrwFihE01EfC9oM00NH0yA5ZU'); // Replace with your actual publishable key
+const stripe = Stripe('pk_live_51QOgcwAWI44r05bCjiaFtRgy9MgqJimdRPVQksK8VRAZF4ZOg0hNQ8DAbq8TwUmtkyGLRWTujewzLzO6Q8L8jlTY00L0lcyWy5'); // Replace with your actual publishable key
 
 // Menu Items with Prices
 const menuItems = {

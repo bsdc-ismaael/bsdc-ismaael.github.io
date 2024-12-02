@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
                 pass: process.env.EMAIL_PASSWORD,
               },
             });
-
+            console.log("paymentIntent: ",paymentIntent)
             const mailOptions = {
               from: process.env.EMAIL_USER,
               to: paymentIntent.customer_details.email,
