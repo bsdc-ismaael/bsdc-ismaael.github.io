@@ -47,41 +47,42 @@ module.exports = async (req, res) => {
       }
     }
     // Handle the Stripe webhook for payment success
-    else if (req.method === 'POST' && req.url === '/api/webhook') {  // Ensure route for webhook
-      const sig = req.headers['stripe-signature'];
-      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;  // Use the webhook secret from the .env file
-      const event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    else if (req.method === 'POST' && req.url === '/api/webhook') {
+      // Use raw body for Stripe webhook verification
+      bodyParser.raw({ type: 'application/json' })(req, res, async () => {
+        try {
+          const sig = req.headers['stripe-signature'];
+          const event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
 
-      if (event.type === 'payment_intent.succeeded') {
-        const paymentIntent = event.data.object;
+          if (event.type === 'payment_intent.succeeded') {
+            const paymentIntent = event.data.object;
 
-        // Send email confirmation using nodemailer
-        const transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: process.env.EMAIL_USER,  // Use environment variable for your email
-            pass: process.env.EMAIL_PASSWORD,   // Use environment variable for your email password
-          },
-        });
+            // Example: Handle successful payment (e.g., send email)
+            const transporter = nodemailer.createTransport({
+              service: 'gmail',
+              auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD,
+              },
+            });
 
-        const mailOptions = {
-          from: process.env.EMAIL_USER, // Sender address
-          to: paymentIntent.receipt_email, // Customer's email
-          subject: 'Payment Successful - Order Confirmation',
-          text: `Your payment of £${(paymentIntent.amount_received / 100).toFixed(2)} was successful! Thank you for your purchase.`,
-        };
+            const mailOptions = {
+              from: process.env.EMAIL_USER,
+              to: paymentIntent.receipt_email,
+              subject: 'Payment Successful - Order Confirmation',
+              text: `Your payment of £${(paymentIntent.amount_received / 100).toFixed(2)} was successful! Thank you for your purchase.`,
+            };
 
-        // Send the email
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            console.error('Error sending email:', error);
-          } else {
-            console.log('Email sent:', info.response);
+            await transporter.sendMail(mailOptions);
+            console.log('Payment confirmation email sent.');
           }
-        });
-      }
 
-      res.status(200).json({ received: true });
+          res.status(200).json({ received: true });
+        } catch (error) {
+          console.error('Webhook signature verification failed:', error.message);
+          res.status(400).json({ error: 'Webhook signature verification failed' });
+        }
+      });
     } else {
       res.status(405).json({ error: 'Method Not Allowed' });
     }
