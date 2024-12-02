@@ -69,7 +69,7 @@ module.exports = async (req, res) => {
 
             const mailOptions = {
               from: process.env.EMAIL_USER,
-              to: paymentIntent.receipt_email,
+              to: paymentIntent.customer_details.email,
               subject: 'Payment Successful - Order Confirmation',
               text: `Your payment of £${(paymentIntent.amount_received / 100).toFixed(2)} was successful! Thank you for your purchase.`,
             };
